@@ -2,6 +2,7 @@ package payments;
 
 import org.aeonbits.owner.ConfigFactory;
 import org.testng.annotations.Test;
+import retrofit2.Call;
 import retrofit2.Response;
 import setup.ConfigValues;
 
@@ -21,20 +22,21 @@ public class APITests {
 
     @Test
     public void testGenerateNewAddress() throws Exception {
-        Response<Object> response = getService().getNewAddress(cfg.api_key(), "newTestLabel").execute().body();
-        assert response != null;
-        assertTrue(response.isSuccessful());
-        assertNotNull(response.body());
+        Call<Response<Object>> response = getService().getNewAddress(cfg.api_key(), "newTestLabel6");
+
+        assertNotNull(response);
+        assertTrue(response.execute().isSuccessful());
+        assertNotNull(response.execute().body());
     }
 
     @Test
     public void testBalanceUpdate() throws Exception {
-        Response<Object> response = getService().getAddressBalance(cfg.api_key(), cfg.bc_address()).execute().body();
-        assert response != null;
-        assertTrue(response.isSuccessful());
-        assertNotNull(response.body());
+        Call<Response<Object>> response = getService().getAddressBalance(cfg.api_key(), cfg.bc_address());
+        assert response.execute().body() != null;
+        assertTrue(response.execute().isSuccessful());
+        assertNotNull(response.execute().body());
 
-        Map<String, Object> responseBody = parseJson(response.body().toString());
+        Map<String, Object> responseBody = parseJson(response.execute().body().toString());
         Map<String, Object> data = (Map<String, Object>) responseBody.get("data");
         double expectedBalance = 123.45;
         String actualBalance = data.get("available_balance").toString();
@@ -45,12 +47,12 @@ public class APITests {
 
     @Test
     public void testRecentTransactions() throws Exception {
-        Response<Object> response = getService().getTransactions(cfg.api_key(), "sent", cfg.bc_address()).execute().body();
+        Call<Response<Object>> response = getService().getTransactions(cfg.api_key(), "sent", cfg.bc_address());
         assert response != null;
-        assertTrue(response.isSuccessful());
-        assertNotNull(response.body());
+        assertTrue(response.execute().isSuccessful());
+        assertNotNull(response.execute().body());
 
-        Map<String, Object> responseBody = parseJson(response.body().toString());
+        Map<String, Object> responseBody = parseJson(response.execute().body().toString());
         List<Map<String, Object>> transactions = (List<Map<String, Object>>) responseBody.get("data");
         assertNotNull("Transactions list should not be null", transactions.get(1).toString());
         boolean transactionFound = transactions.stream()
